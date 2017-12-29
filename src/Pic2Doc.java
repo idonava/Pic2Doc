@@ -23,35 +23,17 @@ import org.apache.poi.xwpf.usermodel.XWPFRun;
 
 public class Pic2Doc extends XWPFDocument {
 
-    static String file2 = "a2.docx";
-    static String path = "C:\\Users\\asaf\\Desktop\\a";
-    static String file = "a.docx";
+    static String destFile = "a2.docx";
+    static String imagesPath = "C:\\pic2doc\\photos";
+    static String programPath = "C:\\pic2doc";
+    static String template = "templateFile.docx";
 
     public static void main(String[] args) throws FileNotFoundException, IOException, InvalidFormatException {
-        CustomXWPFDocument document = new CustomXWPFDocument(new FileInputStream(new File(path + "\\" + file)));
-        getAllFiles(path,document);
+        createTemplateFile();
+        createDestFile();
+        CustomXWPFDocument document = new CustomXWPFDocument(new FileInputStream(new File(programPath + "\\Template\\" + template)));
+        getAllFiles(imagesPath, document);
 
-    }
-
-    public static void getAllFiles(String file, CustomXWPFDocument document) throws IOException {
-        File f = new File(file);
-
-        if (f.isDirectory()) {
-            System.out.println(f.getName());
-            File[] listOfFiles = f.listFiles();
-            for (int i = 0; i < listOfFiles.length; i++) {
-                            System.out.println(listOfFiles[i].getName());
-
-                if (listOfFiles[i].isFile() && listOfFiles[i].getName().toLowerCase().contains("jpg")) {
-                    addString(listOfFiles[i].getAbsolutePath(), path + "\\" + file2, document);
-                    addPicture(path + "\\" + file2, listOfFiles[i].getAbsolutePath(), document);
-                } else if (listOfFiles[i].isDirectory()) {
-                    getAllFiles(listOfFiles[i].getAbsolutePath(), document);
-                }
-            }
-            //   addString(path + "\\" + pic2, path + "\\" + file2, document); print dir name
-
-        }
     }
 
     public static void addString(String s, String path, XWPFDocument document) throws FileNotFoundException, IOException {
@@ -65,6 +47,27 @@ public class Pic2Doc extends XWPFDocument {
         FileOutputStream out = new FileOutputStream(path);
         document.write(out);
         out.close();
+    }
+
+    public static void getAllFiles(String file, CustomXWPFDocument document) throws IOException {
+        File f = new File(file);
+
+        if (f.isDirectory()) {
+            System.out.println(f.getName());
+            File[] listOfFiles = f.listFiles();
+            for (int i = 0; i < listOfFiles.length; i++) {
+                System.out.println(listOfFiles[i].getName());
+
+                if (listOfFiles[i].isFile() && listOfFiles[i].getName().toLowerCase().contains("jpg")) {
+                    addString(listOfFiles[i].getAbsolutePath(), programPath + "\\" + destFile, document);
+                    addPicture(programPath + "\\" + destFile, listOfFiles[i].getAbsolutePath(), document);
+                } else if (listOfFiles[i].isDirectory()) {
+                    getAllFiles(listOfFiles[i].getAbsolutePath(), document);
+                }
+            }
+            //   addString(path + "\\" + pic2, path + "\\" + file2, document); print dir name
+
+        }
     }
 
     private static void addPicture(String path2File2, String path2Pic2, CustomXWPFDocument document) {
@@ -92,6 +95,46 @@ public class Pic2Doc extends XWPFDocument {
             Logger.getLogger(Pic2Doc.class.getName()).log(Level.SEVERE, null, ex);
         }
 
+    }
+
+    private static void createTemplateFile() {
+        checkExistAndCreate(new File(programPath + "\\Template\\" + template));
+
+    }
+
+    private static void checkExistAndCreate(File f) {
+        System.out.println(f.getParentFile());
+        if (!f.getParentFile().exists()){
+            System.out.println(f.getParentFile());
+            f.getParentFile().mkdirs();
+        }
+        if (!f.exists()) {
+            try {
+                f.createNewFile();
+               
+            } catch (IOException ex) {
+                Logger.getLogger(Pic2Doc.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    private static void createDestFile() {
+        File f = new File(programPath + "\\" + destFile);
+        if (!f.exists()){
+          
+            return;
+        }
+        
+        int counter=1;
+        String tempDestFile="";
+        while (f.exists()){
+            
+            tempDestFile=destFile.split(".docx")[0]+"("+(counter++)+").docx";
+            f=new File(programPath + "\\" + tempDestFile);
+        }
+          System.out.println(destFile+" is exist, changing to: "+tempDestFile);
+        destFile=tempDestFile;
+        
     }
 
     public Pic2Doc(InputStream in) throws IOException {
